@@ -156,7 +156,7 @@ class Event(models.Model):
     def get_rrule_object(self, tzinfo):
         if self.rule is None:
             return
-        params = self._event_params()
+        params = self.event_rule_params
         frequency = self.rule.rrule_frequency()
         if timezone.is_naive(self.start):
             dtstart = self.start
