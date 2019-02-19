@@ -20,26 +20,6 @@ from schedule.models.calendars import Calendar
 from schedule.models.rules import Rule
 from schedule.utils import OccurrenceReplacer
 
-freq_dict_order = {
-    'YEARLY': 0,
-    'MONTHLY': 1,
-    'WEEKLY': 2,
-    'DAILY': 3,
-    'HOURLY': 4,
-    'MINUTELY': 5,
-    'SECONDLY': 6
-}
-param_dict_order = {
-    'byyearday': 1,
-    'bymonth': 1,
-    'bymonthday': 2,
-    'byweekno': 2,
-    'byweekday': 3,
-    'byhour': 4,
-    'byminute': 5,
-    'bysecond': 6
-}
-
 
 class EventManager(models.Manager):
     def get_for_object(self, content_object, distinction='', inherit=True):
@@ -342,41 +322,15 @@ class Event(models.Model):
     def event_rule_params(self):
         return self.rule.get_params()
 
-    def _event_params(self):
-        freq_order = freq_dict_order[self.rule.frequency]
-        rule_params = self.event_rule_params
-        start_params = self.event_start_params
-        event_params = {}
-
-        if len(rule_params) == 0:
-            return event_params
-
-        for param in rule_params:
-            # start date influences rule params
-            if (param in param_dict_order and param_dict_order[param] > freq_order and
-                    param in start_params):
-                sp = start_params[param]
-                if sp == rule_params[param] or (
-                        hasattr(rule_params[param], '__iter__') and
-                        sp in rule_params[param]):
-                    event_params[param] = [sp]
-                else:
-                    event_params[param] = rule_params[param]
-            else:
-                event_params[param] = rule_params[param]
-
-        return event_params
-
     @property
     def event_params(self):
-        event_params = self._event_params()
         start = self.effective_start
         empty = False
         if not start:
             empty = True
         elif self.end_recurring_period and start > self.end_recurring_period:
             empty = True
-        return event_params, empty
+        return self.event_rule_params, empty
 
     @property
     def effective_start(self):
