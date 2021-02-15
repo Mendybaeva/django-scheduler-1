@@ -547,6 +547,7 @@ class Occurrence(models.Model):
         verbose_name = _("occurrence")
         verbose_name_plural = _("occurrences")
         index_together = (("start", "end"),)
+        unique_together = ('event', 'start', 'end')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
